@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Table Reservation</string>
+    <string name="table_1">Table 1</string>
+    <string name="table_2">Table 2</string>
+    <string name="table_3">Table 3</string>
+    <string name="table_4">Table 4</string>
+    <string name="customer_list">Customer List</string>
+    <string name="reserve_a_table_for">Reserve a table for</string>
+    <string name="reserve">RESERVE</string>
+    <string name="customer_name">Customer Name</string>
+</resources>
