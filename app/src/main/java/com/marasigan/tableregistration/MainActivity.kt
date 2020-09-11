@@ -1,13 +1,18 @@
 package com.marasigan.tableregistration
 
 import android.app.AlertDialog
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.*
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import com.marasigan.tableregistration.service.TableService
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
@@ -20,6 +25,7 @@ class MainActivity : AppCompatActivity() {
         private const val RESERVE_REQUEST = 642
         private const val MAX_PAX = 5
         const val BROADCAST_ACTION = "BROADCAST_ACTION"
+        const val channelID = "notify_001"
     }
 
     private lateinit var context: Context
@@ -34,6 +40,8 @@ class MainActivity : AppCompatActivity() {
     private var table3List: ArrayList<String> = arrayListOf()
     private var table4List: ArrayList<String> = arrayListOf()
 
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -42,6 +50,9 @@ class MainActivity : AppCompatActivity() {
         dbHelper = CustomersDBHelper(context)
 
         intentFilter.addAction(BROADCAST_ACTION)
+
+
+        createNotificationChannel(channelID)
 
         // show customer list
         table1_button.setOnClickListener {
@@ -73,6 +84,23 @@ class MainActivity : AppCompatActivity() {
             startService(tableListIntent)
         }
 
+
+    }
+
+    private fun createNotificationChannel(channelID: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "Channel 001"
+            val channelDescription = "Channel Description"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+
+            val channel = NotificationChannel(channelID, name, importance)
+            channel.apply {
+                description = channelDescription
+            }
+
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
 
     }
 
@@ -129,13 +157,26 @@ class MainActivity : AppCompatActivity() {
                             dbHelper.insertCustomer(customerName, 4)
                             showAlertDialog(customerName, 4, table4List)
                         } else {
-                            showAlertDialog(customerName, 0, arrayListOf())
+//                            showAlertDialog(customerName, 0, arrayListOf())
+                            showNotif("Tables are full")
                         }
                     }
                 }
             }
             else -> super.onActivityResult(requestCode, resultCode, data)
         }
+    }
+
+    private fun showNotif(message: String) {
+        val notificationBuilder = NotificationCompat.Builder(this, channelID)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentTitle("Table Reservation App")
+            .setContentText(message)
+
+        with(NotificationManagerCompat.from(this)) {
+            notify(1, notificationBuilder.build())
+        }
+
     }
 
     private val mainReceiver: BroadcastReceiver = object : BroadcastReceiver() {
